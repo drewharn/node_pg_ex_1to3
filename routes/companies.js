@@ -1,6 +1,7 @@
 /** The routes for companies: */
 
 const express = require("express");
+const slugify = require("slugify");
 const ExpressError = require("../expressError")
 const db = require("../db")
 
@@ -72,6 +73,7 @@ router.get("/:code", async function (req, res, next) {
 router.post("/", async function (req, res, next) {
     try {
         let {name, description} = req.body;
+        let code = slugify(name, {lower: true});
         
         const result = await db.query(
             `INSERT INTO companies (code, name, description)
@@ -128,7 +130,7 @@ router.delete("/:code", async function (req, res, next) {
             RETURNING code`,
         [code]);
     
-    if (results.rows.length === 0) {
+    if (result.rows.length === 0) {
         throw new ExpressError(`No such company: ${code}`, 404)
     } else {
         return res.json({"status": "deleted"});
